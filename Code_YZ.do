@@ -4,12 +4,12 @@
 
 * Author: Yi Zuo
 * Date last modified: 03/14/2019
-* cd Google\ Drive\ File\ Stream/My\ Drive/Vanderbilt/2nd\ Semester\ 2018-2019/Bios6312_Regression/Project/
+* cd Google\ Drive\ File\ Stream/My\ Drive/Vanderbilt/2nd\ Semester\ 2018-2019/Bios6312_Regression/Bios6312Project/
 
 ********************************************************************************
 * STEP ONE: DATA PREPARATION
 ********************************************************************************
-cd "/Volumes/GoogleDrive/My Drive/Vanderbilt/2nd Semester 2018-2019/Bios6312_Regression/Project"
+cd "/Volumes/GoogleDrive/My Drive/Vanderbilt/2nd Semester 2018-2019/Bios6312_Regression/Bios6312Project"
 
 * import data
 clear
@@ -78,11 +78,209 @@ gen BMI = Weight/(Height/100)^2
 
 label var BMI "BMI, kg/m^2"
 
+********************************************************************************
+* STEP TWO: DESCRIPTIVE STATISTICS
+********************************************************************************
+
+*************************
+* Skeletal measurements *
+*************************
+
+* Biacromial diameter
+summ BiacromialS, d // no missing
+hist BiacromialS // looks approximately normal
+kdensity BiacromialS
+
+ttest BiacromialS, by(Gender) // p<0.00001
+
+* Biiliac skeletal
+summ BiiliacS, d // no missing
+hist BiiliacS // looks approximately normal
+kdensity BiiliacS
+
+ttest BiiliacS, by(Gender) // p=0.0092
+
+* Bitrochanteric skeletal
+summ BitrochantericS, d // no missing
+hist BitrochantericS // looks approximately normal
+kdensity BitrochantericS
+
+ttest BitrochantericS, by(Gender) // p<0.00001
+
+* Chest depth skeletal
+summ ChestDepthS, d // no missing
+hist ChestDepthS // looks not normal
+kdensity ChestDepthS
+
+ttest ChestDepthS, by(Gender) // p<0.00001
+
+* Chest skeletal
+summ ChestS, d // no missing
+hist ChestS // looks not normal
+kdensity ChestS
+
+ttest ChestS, by(Gender) // p<0.00001
+
+* Elbow skeletal
+summ ElbowS, d // no missing
+hist ElbowS // looks approximately normal
+kdensity ElbowS
+
+ttest ElbowS, by(Gender) // p<0.00001
+
+* Wrist skeletal
+summ WristS, d // no missing
+hist WristS // looks approximately normal
+kdensity WristS
+
+ttest WristS, by(Gender) // p<0.00001
+
+* Knee skeletal
+summ KneeS, d // no missing
+hist KneeS // looks not normal
+kdensity KneeS
+
+ttest KneeS, by(Gender) // p<0.00001
+
+* Ankle skeletal
+summ AnkleS, d // no missing
+hist AnkleS // looks approximately normal
+kdensity AnkleS
+
+ttest AnkleS, by(Gender) // p<0.00001
+
+// looks like all skeletal measurements are highly correlated with gender
+
+**********************
+* Girth measurements *
+**********************
+
+* Shoulder girth
+summ ShoulderG, d // no missing
+hist ShoulderG // looks not normal
+kdensity ShoulderG
+
+corr ShoulderG Weight // rho=0.88
+corr ShoulderG BMI // rho=0.70
+
+* Chest girth
+summ ChestG, d // no missing
+hist ChestG // looks approximately normal
+kdensity ChestG
+
+corr ChestG Weight // rho=0.90
+corr ChestG BMI // rho=0.76
+
+* Waist girth
+summ WaistG, d // no missing
+hist WaistG // looks not normal
+kdensity WaistG
+
+corr WaistG Weight // rho=0.90
+corr WaistG BMI // rho=0.82
+
+* Navel girth
+summ NavelG, d // no missing
+hist NavelG // looks approximately normal
+kdensity NavelG
+
+corr NavelG Weight // rho=0.71
+corr NavelG BMI // rho=0.76
+
+* Hip girth
+summ HipG, d // no missing
+hist HipG // looks approximately normal
+kdensity HipG
+
+corr HipG Weight // rho=0.76
+corr HipG BMI // rho=0.81
+
+* Thigh girth
+summ ThighG, d // no missing
+hist ThighG // looks not normal
+kdensity ThighG
+
+corr ThighG Weight // rho=0.56
+corr ThighG BMI // rho=0.70
+
+* Bicep girth
+summ BicepG, d // no missing
+hist BicepG // looks not normal
+kdensity BicepG
+
+corr BicepG Weight // rho=0.87
+corr BicepG BMI // rho=0.74
+
+* Forearm girth
+summ ForearmG, d // no missing
+hist ForearmG // looks not normal
+kdensity ForearmG
+
+corr ForearmG Weight // rho=0.87
+corr ForearmG BMI // rho=0.70
+
+* Knee girth
+summ KneeG, d // no missing
+hist KneeG // looks not normal
+kdensity KneeG
+
+corr KneeG Weight // rho=0.80
+corr KneeG BMI // rho=0.70
+
+* Calf girth
+summ CalfG, d // no missing
+hist CalfG // looks approximately normal
+kdensity CalfG
+
+corr CalfG Weight // rho=0.77
+corr CalfG BMI // rho=0.72
+
+* Ankle girth
+summ AnkleG, d // no missing
+hist AnkleG // looks approximately normal
+kdensity AnkleG
+
+corr AnkleG Weight // rho=0.76
+corr AnkleG BMI // rho=0.61
+
+* Wrist girth
+summ WristG, d // no missing
+hist WristG // looks not normal
+kdensity WristG
+
+corr WristG Weight // rho=0.82
+corr WristG BMI // rho=0.59
+
+// not all covariates are highly correlated with the outcomes
+// some covariates may be only highly correlated with one outcome
+
+**********************
+* Other measurements *
+**********************
+
+* Age
+summ Age, d // no missing
+hist Age // looks not normal
+kdensity Age
+
+ttest Age, by(Gender) // p=0.0006
+corr Age Weight // rho=0.21
+corr Age BMI // rho=0.24
+
+* Height
+summ Height, d // no missing
+hist Height // looks approximately normal
+kdensity Height
+
+corr Height Weight // rho=0.72
+corr Height BMI // rho=0.20
+
+
+
+
 
 
 
 ********************************************************************************
-* STEP TWO:
+* STEP THREE: MODEL FOR AIM 1A
 ********************************************************************************
-
-
