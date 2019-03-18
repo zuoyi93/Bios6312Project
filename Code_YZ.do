@@ -283,6 +283,9 @@ corr Height BMI // rho=0.20
 gladder Weight
 // log transformation might be good?
 
+gen lWeight = log(Weight)
+* Forward selection using AIC 
+vselect lWeight BiacromialS-Age Gender, forward aic
 
 
 
@@ -290,7 +293,7 @@ gladder Weight
 
 
 
-
+																   
 
 
 
