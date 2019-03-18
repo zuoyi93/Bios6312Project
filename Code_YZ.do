@@ -275,12 +275,23 @@ kdensity Height
 corr Height Weight // rho=0.72
 corr Height BMI // rho=0.20
 
-
-
-
-
-
-
 ********************************************************************************
-* STEP THREE: MODEL FOR AIM 1A
+* STEP THREE: MODEL FOR AIM 1A (PREDICT WEIGHT WITH ALL VARIABLES)
 ********************************************************************************
+
+* Dependent variable: weight
+gladder Weight
+// log transformation might be good?
+
+
+
+
+
+
+
+
+
+
+
+
+
