@@ -13,7 +13,7 @@ cd "/Volumes/GoogleDrive/My Drive/Vanderbilt/2nd Semester 2018-2019/Bios6312_Reg
 
 * import data
 clear
-import delimited "body.dat.txt", delimiter(" ",collapse)
+import delimited "Data/body.dat.txt", delimiter(" ",collapse)
 
 * label variables
 label var v1 "Biacromial skeletal"
@@ -78,9 +78,9 @@ gen BMI = Weight/(Height/100)^2
 
 label var BMI "BMI, kg/m^2"
 
-save"body.dta",replace
+save"Data/body.dta",replace
 
-use"body.dta",clear
+use"Data/body.dta",clear
 
 ********************************************************************************
 * STEP TWO: DESCRIPTIVE STATISTICS
