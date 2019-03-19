@@ -288,11 +288,18 @@ gladder Weight
 // log transformation might be good?
 
 gen lWeight = log(Weight)
+
 * Forward selection using AIC 
-vselect lWeight BiacromialS-Age Gender, forward aic
+vselect lWeight BiacromialS-AnkleS AnkleG KneeG WristG Gender Age, backward aic
 
 
+vselect lWeight BiacromialS-AnkleS Gender Age, backward aic
+// -1302.705
 
+
+vselect lWeight BiacromialS BiiliacS BitrochantericS ChestDepthS ChestS ElbowS   ///
+AnkleG KneeG WristG Gender Age, backward aic
+// -1454.812
 
 
 
