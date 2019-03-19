@@ -78,6 +78,10 @@ gen BMI = Weight/(Height/100)^2
 
 label var BMI "BMI, kg/m^2"
 
+save"body.dta",replace
+
+use"body.dta",clear
+
 ********************************************************************************
 * STEP TWO: DESCRIPTIVE STATISTICS
 ********************************************************************************
