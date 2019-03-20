@@ -280,8 +280,10 @@ corr Height Weight // rho=0.72
 corr Height BMI // rho=0.20
 
 ********************************************************************************
-* STEP THREE: MODEL FOR AIM 1A (PREDICT WEIGHT WITH ALL VARIABLES)
+* STEP THREE: MODEL FOR AIM 1A (PREDICT WEIGHT WITH SKELETAL AND THREE GIRTH)
 ********************************************************************************
+clear
+use"Data/body.dta"
 
 * Dependent variable: weight
 gladder Weight
@@ -289,9 +291,28 @@ gladder Weight
 
 gen lWeight = log(Weight)
 
-* Forward selection using AIC 
-vselect lWeight BiacromialS-AnkleS AnkleG KneeG WristG Gender Age, backward aic
+* Model selection using best
+vselect lWeight BiacromialS-AnkleS Gender Age, best
+// ChestDepthS ChestS KneeS BitrochantericS Age BiiliacS WristS ElbowS
 
+vselect lWeight BiacromialS BiiliacS BitrochantericS ChestDepthS ChestS ElbowS   ///
+AnkleG KneeG WristG Gender Age, best
+
+// ChestDepthS KneeG ChestS BitrochantericS BiiliacS WristG ElbowS Age Gender AnkleG
+
+* Comparison of two models
+reg lWeight ChestDepthS ChestS KneeS BitrochantericS Age BiiliacS WristS ElbowS
+estat ic
+// AIC: -1320.389, BIC: -1282.332
+rvfplot
+
+reg lWeight ChestDepthS KneeG ChestS BitrochantericS BiiliacS WristG ElbowS Age Gender AnkleG
+estat ic
+// AIC: -1461.679, BIC: -1415.166
+rvfplot
+
+
+* Backward selection using AIC 
 
 vselect lWeight BiacromialS-AnkleS Gender Age, backward aic
 // -1302.705
