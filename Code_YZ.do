@@ -379,12 +379,28 @@ gen sq_sum_G2_3 = sum_G2_3^2
 reg lWeight sq_sum_G2_3 Gender Age
 estat ic // AIC=-1041.318 greater than first method
 
+***********************************************
+* STEP FOUR: MODEL DIAGNOSTICS AND VALIDATION *
+*********************************************** 
+
+****************
+* Model 1a-1-2 *
+****************
+
+reg lWeight ChestDepthS KneeG ChestS BitrochantericS BiiliacS WristG ElbowS Age Gender AnkleG
+rvfplot, caption(Model 1a-1-2) 
 
 
 
 
 
 
+****************
+* Model 1a-2-2 *
+****************
+
+reg lWeight sq_sum_G_height Age
+rvfplot
 
 
 
