@@ -80,6 +80,11 @@ label var BMI "BMI, kg/m^2"
 
 save"Data/body.dta",replace
 
+
+
+
+
+
 use"Data/body.dta",clear
 
 ********************************************************************************
@@ -282,6 +287,11 @@ corr Height BMI // rho=0.20
 ********************************************************************************
 * STEP THREE: MODEL FOR AIM 1A (PREDICT WEIGHT WITH SKELETAL AND THREE GIRTH)
 ********************************************************************************
+
+*******************************
+* Aim 1-a-1 Constant measures *
+*******************************
+
 clear
 use"Data/body.dta"
 
@@ -322,10 +332,60 @@ vselect lWeight BiacromialS BiiliacS BitrochantericS ChestDepthS ChestS ElbowS  
 AnkleG KneeG WristG Gender Age, backward aic
 // -1454.812
 
+// same model as `best`
+
+
+************************
+* Aim 1-a-2 Square sum *
+************************																   
+
+** all girth
+* First method: sum first, then square, finally multiply
+egen sum_G = rowtotal(*G)
+gen sq_sum_G = sum_G^2
+gen sq_sum_G_height = sq_sum_G * Height
+
+reg lWeight sq_sum_G_height Gender Age
+estat ic
+
+reg lWeight sq_sum_G_height Age
+estat ic
+// AIC (-1853.184) is smaller so this is a better model, so no gender.
+
+* Second method: multiply first, then sum, finally square
+for var *G: gen X_H = X * Height
+egen sum_G2 = rowtotal(*_H)
+gen sq_sum_G2 = sum_G2^2
+
+reg lWeight sq_sum_G2 Gender Age
+estat ic // AIC=-1545.835 much greater than first method
+
+** three constant girth
+* First method: sum first, then square, finally multiply
+egen sum_3 = rowtotal(WristG KneeG AnkleG)
+gen sq_sum_3 = sum_3^2
+gen sq_sum_3_height = sq_sum_3 * Height
+
+reg lWeight sq_sum_3_height Gender Age
+estat ic
+
+// AIC= -1105.635 is big
+
+* Second method: multiply first, then sum, finally square
+for var WristG KneeG AnkleG: gen X_h = X * Height
+egen sum_G2_3 = rowtotal(*_h)
+gen sq_sum_G2_3 = sum_G2_3^2
+
+reg lWeight sq_sum_G2_3 Gender Age
+estat ic // AIC=-1041.318 greater than first method
 
 
 
-																   
+
+
+
+
+
 
 
 
