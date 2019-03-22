@@ -390,17 +390,123 @@ estat ic // AIC=-1041.318 greater than first method
 reg lWeight ChestDepthS KneeG ChestS BitrochantericS BiiliacS WristG ElbowS Age Gender AnkleG
 rvfplot, caption(Model 1a-1-2) 
 
+		estat hettest, iid rhs		// Breush-Pagan / Cook-Weisberg, LM	
 
+* normality	
+predict r,r
+kdensity r, kernel(gaussian) normal
 
+* outliers
+	*** Tukey's fences
+	graph box r
+	summ r, detail
+		scalar iqr = r(p75) - r(p25)
+		scalar lofence = r(p25) - 1.5*iqr
+		scalar hifence = r(p75) + 1.5*iqr
+		di "Low fence = " lofence ", High fence = " hifence
+		// Only DC's residual value is outside of the fences.
+		
+		*** Probabilty outside fences if value are normally distributed.
+			di 2*(1-normal(invnormal(.75)*(2*1.5+1))) 
+	gen flag = 1 if r > hifence | r < lofence
+	table flag // 6 outliers 
+	
+	summ ChestDepthS,d
+	summ ChestDepthS if flag == 1,d
 
+* leverage
+	predict lev, leverage
+		sort lev
+		hilo lev , show(10) high
+	
+	* Suggested cut-point for leverage
+	global lev_cut = (2*e(df_m)+2)/e(N)  // (2*p+2)/n
+	display $lev_cut
+	list Weight if lev > $lev_cut
 
+	lvr2plot,  yline($lev_cut, lcolor(blue) lpattern(dash)) 
+		            // Red lines depict averages of the axis measure		
 
+* influence
+
+	predict cooksd, cooksd
+
+	* Cook's Distance
+	sort cooksd
+	hilo cooksd, high
+	* Common cut-off:
+		di 4/(e(N)-e(df_m)-1)					
+
+drop flag
+gen flag = 1 if cooksd > 0.00806
+tab flag		
+
+summ cooksd if flag == 1
+		
 ****************
 * Model 1a-2-2 *
 ****************
 
 reg lWeight sq_sum_G_height Age
 rvfplot
+
+		estat hettest, iid rhs		// Breush-Pagan / Cook-Weisberg, LM	
+
+* normality	
+drop r
+predict r,r
+kdensity r, kernel(gaussian) normal
+
+* outliers
+	*** Tukey's fences
+	graph box r
+	summ r, detail
+		scalar iqr = r(p75) - r(p25)
+		scalar lofence = r(p25) - 1.5*iqr
+		scalar hifence = r(p75) + 1.5*iqr
+		di "Low fence = " lofence ", High fence = " hifence
+
+		
+		*** Probabilty outside fences if value are normally distributed.
+			di 2*(1-normal(invnormal(.75)*(2*1.5+1))) 
+	drop flag
+	gen flag = 1 if r > hifence | r < lofence
+	table flag // 5 outliers 
+	
+	summ ChestDepthS,d
+	summ ChestDepthS if flag == 1,d
+
+* leverage
+	drop lev
+	predict lev, leverage
+		sort lev
+		hilo lev , show(10) high
+	
+	* Suggested cut-point for leverage
+	global lev_cut = (2*e(df_m)+2)/e(N)  // (2*p+2)/n
+	display $lev_cut
+	list Weight if lev > $lev_cut
+
+	lvr2plot,  yline($lev_cut, lcolor(blue) lpattern(dash)) 
+		            // Red lines depict averages of the axis measure		
+
+* influence
+	drop cooksd
+	predict cooksd, cooksd
+
+	* Cook's Distance
+	sort cooksd
+	hilo cooksd, high
+	* Common cut-off:
+		di 4/(e(N)-e(df_m)-1)					
+
+drop flag
+gen flag = 1 if cooksd > 0.00806
+tab flag		
+
+summ cooksd if flag == 1
+		
+
 
 
 
