@@ -301,7 +301,10 @@ gladder Weight
 
 gen lWeight = log(Weight)
 
-* Model selection using best
+*********************************************
+* Model selection using best without height *
+*********************************************
+
 vselect lWeight BiacromialS-AnkleS Gender Age, best
 // ChestDepthS ChestS KneeS BitrochantericS Age BiiliacS WristS ElbowS
 
@@ -331,6 +334,44 @@ vselect lWeight BiacromialS-AnkleS Gender Age, backward aic
 vselect lWeight BiacromialS BiiliacS BitrochantericS ChestDepthS ChestS ElbowS   ///
 AnkleG KneeG WristG Gender Age, backward aic
 // -1454.812
+
+// same model as `best`
+
+*********************************************
+* Model selection using best with height *
+*********************************************
+
+vselect lWeight BiacromialS-AnkleS Gender Age Height, best
+// ChestDepthS ChestS KneeS BitrochantericS Age BiiliacS WristS ElbowS
+// ChestDepthS ChestS KneeS BitrochantericS Height WristS Age BiiliacS BiacromialS
+
+vselect lWeight BiacromialS BiiliacS BitrochantericS ChestDepthS ChestS ElbowS   ///
+AnkleG KneeG WristG Gender Age Height, best
+
+// ChestDepthS KneeG ChestS BitrochantericS BiiliacS WristG ElbowS Age Gender AnkleG
+// ChestDepthS KneeG ChestS Height BitrochantericS WristG BiiliacS Age ElbowS BiacromialS AnkleG Gender
+
+* Comparison of two models
+reg lWeight ChestDepthS ChestS KneeS BitrochantericS Height WristS Age BiiliacS BiacromialS
+estat ic
+// AIC: -1345.172
+rvfplot
+
+reg lWeight ChestDepthS KneeG ChestS Height BitrochantericS WristG BiiliacS Age ElbowS BiacromialS AnkleG Gender
+estat ic
+// AIC: -1481.041
+rvfplot
+
+
+* Backward selection using AIC 
+
+vselect lWeight BiacromialS-AnkleS Gender Age Height, backward aic
+// -1345.172
+
+
+vselect lWeight BiacromialS BiiliacS BitrochantericS ChestDepthS ChestS ElbowS   ///
+AnkleG KneeG WristG Gender Height Age, backward aic
+// -1481.041
 
 // same model as `best`
 
