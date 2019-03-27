@@ -391,7 +391,8 @@ estat ic // AIC=-1041.318 greater than first method
 
 reg lWeight ChestDepthS KneeG ChestS Height BitrochantericS WristG BiiliacS Age ElbowS BiacromialS AnkleG Gender
 rvfplot, caption(Model 1a-1-2) 
-
+		
+		estat imtest, white	
 		estat hettest, iid rhs		// Breush-Pagan / Cook-Weisberg, LM	
 
 * normality	
@@ -411,7 +412,7 @@ kdensity r, kernel(gaussian) normal
 		*** Probabilty outside fences if value are normally distributed.
 			di 2*(1-normal(invnormal(.75)*(2*1.5+1))) 
 	gen flag = 1 if r > hifence | r < lofence
-	table flag // 6 outliers 
+	table flag // 5 outliers 
 	
 	summ ChestDepthS,d
 	summ ChestDepthS if flag == 1,d
@@ -444,7 +445,13 @@ gen flag = 1 if cooksd > 0.00806
 tab flag		
 
 summ cooksd if flag == 1
-		
+	
+* cross validation
+crossfold regress lWeight ChestDepthS KneeG ChestS Height BitrochantericS ///
+ WristG BiiliacS Age ElbowS BiacromialS AnkleG Gender, k(10) r2
+		matrix m = J(1,10,1/10)*r(est) // Average Psuedo-R2
+		matrix list m
+	
 ****************
 * Model 1a-2-2 *
 ****************
@@ -508,6 +515,362 @@ tab flag
 
 summ cooksd if flag == 1
 		
+* cross validation
+crossfold regress lWeight sq_sum_G_height Age, k(10) r2
+		matrix m = J(1,10,1/10)*r(est) // Average Psuedo-R2
+		matrix list m
+
+
+********************************************************************************
+* Mindy's code
+********************************************************************************
+
+
+***********************************************
+* AIM 2: MODEL SELECTION*
+***********************************************
+
+*Gender
+
+ tab Gender
+ 
+**Models with Height 
+ 
+ *Model with all of the variables
+ logistic Gender BiacromialS-AnkleS Height
+ estat ic
+ estat classification
+ 
+ *** Stepwise, starting forward
+ xi: stepwise, pe(.10) pr(.25) forward: logit Gender BiacromialS-AnkleS Height
+ estat ic
+ estat classification
+								
+ *** Stepwise, starting backward
+ xi: stepwise, pe(.10) pr(.25): logit Gender BiacromialS-AnkleS Height
+ estat ic
+ estat classification
+
+**Models without Height
+
+ *Model with all skeletal variables
+ logistic Gender BiacromialS-AnkleS
+ estat ic
+ estat classification
+ 
+ *** Stepwise, starting forward
+ xi: stepwise, pe(.10) pr(.25) forward: logit Gender BiacromialS-AnkleS
+ // ElbowS BiacromialS BitrochantericS ChestDepthS AnkleS WristS KneeS
+ 
+ estat ic
+ estat classification
+
+ *** Stepwise, starting backward
+ xi: stepwise, pe(.10) pr(.25): logit Gender BiacromialS-AnkleS
+ //BiacromialS KneeS BitrochantericS ChestDepthS AnkleS ElbowS WristS
+ 
+ estat ic
+ estat classification
+ 
+**Check diagnostics with nestreg
+
+ nestreg, lr: logit Gender (ElbowS BiacromialS BitrochantericS ChestDepthS Height WristS KneeS) (BiiliacS AnkleS) (ChestS)
+
+**Prediction model with height included 
+
+ logistic Gender ElbowS BiacromialS BitrochantericS ChestDepthS Height WristS KneeS
+ estat classification
+
+ /*Logistic model for Gender
+
+              -------- True --------
+Classified |         D            ~D  |      Total
+-----------+--------------------------+-----------
+     +     |       237            12  |        249
+     -     |        10           248  |        258
+-----------+--------------------------+-----------
+   Total   |       247           260  |        507
+
+Classified + if predicted Pr(D) >= .5
+True D defined as Gender != 0
+--------------------------------------------------
+Sensitivity                     Pr( +| D)   95.95%
+Specificity                     Pr( -|~D)   95.38%
+Positive predictive value       Pr( D| +)   95.18%
+Negative predictive value       Pr(~D| -)   96.12%
+--------------------------------------------------
+False + rate for true ~D        Pr( +|~D)    4.62%
+False - rate for true D         Pr( -| D)    4.05%
+False + rate for classified +   Pr(~D| +)    4.82%
+False - rate for classified -   Pr( D| -)    3.88%
+--------------------------------------------------
+Correctly classified                        95.66%
+--------------------------------------------------
+*/
+
+ lroc, connect(stepstair) //post logistic regression command, need to run regression first
+ lsens
+ 
+ lroc, recast(line)
+ 
+*Prediction model without height
+
+ logistic Gender BiacromialS KneeS BitrochantericS ChestDepthS AnkleS ElbowS WristS
+ estat classification
+ 
+ /*Logistic model for Gender
+
+              -------- True --------
+Classified |         D            ~D  |      Total
+-----------+--------------------------+-----------
+     +     |       237            13  |        250
+     -     |        10           247  |        257
+-----------+--------------------------+-----------
+   Total   |       247           260  |        507
+
+Classified + if predicted Pr(D) >= .5
+True D defined as Gender != 0
+--------------------------------------------------
+Sensitivity                     Pr( +| D)   95.95%
+Specificity                     Pr( -|~D)   95.00%
+Positive predictive value       Pr( D| +)   94.80%
+Negative predictive value       Pr(~D| -)   96.11%
+--------------------------------------------------
+False + rate for true ~D        Pr( +|~D)    5.00%
+False - rate for true D         Pr( -| D)    4.05%
+False + rate for classified +   Pr(~D| +)    5.20%
+False - rate for classified -   Pr( D| -)    3.89%
+--------------------------------------------------
+Correctly classified                        95.46%
+--------------------------------------------------
+*/
+
+ lroc, connect(stepstair) //post logistic regression command, need to run regression first
+ lsens
+ 
+ lroc, recast(line)
+ 
+**Validation with height
+
+ logistic Gender ElbowS BiacromialS BitrochantericS ChestDepthS Height WristS KneeS
+ predict pred, p
+ 
+ crossfold logistic Gender ElbowS BiacromialS BitrochantericS ChestDepthS Height WristS KneeS, k(10) r2
+		matrix m = J(1,10,1/10)*r(est) // Average Psuedo-R2
+		matrix list m
+		
+//Randomly divide into training and test sets
+	set seed 745868
+	gen rand_num = uniform() //uniform random number between 0 and 1
+	egen ordering = rank(rand_num)
+	gen group = ""
+	replace group = "Train" if ordering <= _N/2 //_N is the size of the dataset
+	replace group = "Test" if ordering > _N/2
+
+	logistic Gender ElbowS BiacromialS BitrochantericS ChestDepthS Height WristS KneeS if group=="Train"
+		predict pred
+		quietly corr Gender pred if group=="Test"
+		di r(rho)^2
+		
+	twoway (scatter Gender pred if group=="Train")              ///
+			  (lfit Gender pred if group=="Train")              ///
+		   (scatter Gender pred if group=="Test", mcolor(red))  ///
+			  (lfit Gender pred if group=="Test")
+
+**Validation without height
+
+ logistic Gender BiacromialS KneeS BitrochantericS ChestDepthS AnkleS ElbowS WristS
+	crossfold logistic Gender BiacromialS KneeS BitrochantericS ChestDepthS AnkleS ElbowS WristS, k(10) r2
+		matrix m = J(1,10,1/10)*r(est) // Average Psuedo-R2
+		matrix list m		  
+			  
+*Other
+swboot Gender ElbowS BiacromialS BitrochantericS ChestDepthS Height WristS KneeS, reps(100) forward pr(.25) pe(.10) roc
+
+***********************************************
+* DESCRIPTIVES *
+***********************************************
+	
+graph box Height Weight BMI, over(Gender)
+graph box Weight, over(Gender)
+graph box BMI, over(Gender)
+graph box Age, over(Gender)
+
+graph box BiacromialS BiiliacS BitrochantericS ChestDepthS ChestS ElbowS WristS KneeS AnkleS, over(Gender)
+
+graph box ShoulderG ChestG WaistG NavelG HipG ThighG BicepG ForearmG KneeG CalfG AnkleG WristG, over(Gender)
+
+
+gen bmi_cat=.
+replace bmi_cat=0 if BMI<18.5
+replace bmi_cat=1 if BMI>=18.5 & BMI<25
+replace bmi_cat=2 if BMI>=25 & BMI<30
+replace bmi_cat=3 if BMI>=30
+
+label define bmilab 0 "Less than 18.5" 1 "18.5-25" 2 "25-30" 3 "Over 30"
+label values bmi_cat bmilab
+
+tab bmi_cat
+by Gender, sort: tab bmi_cat
+
+corr WristG WristS
+corr KneeS KneeG
+corr AnkleS AnkleG
+corr ChestS ChestG
+corr BiiliacS BitrochantericS
+corr WaistG NavelG
+corr ChestG BicepG if Gender==1
+corr ThighG HipG if Gender==0
+
+**Table 1
+
+ by Gender, sort: sum BiacromialS, detail
+ sum BiacromialS, detail
+ 
+ by Gender, sort: sum BiiliacS, detail
+ sum BiiliacS, detail
+ 
+ by Gender, sort: sum BitrochantericS, detail
+ sum BitrochantericS, detail
+ 
+ by Gender, sort: sum ChestDepthS, detail
+ sum ChestDepthS, detail
+ 
+ by Gender, sort: sum ChestS, detail
+ sum ChestS, detail
+ 
+ by Gender, sort: sum ElbowS, detail
+ sum ElbowS, detail
+ 
+ by Gender, sort: sum WristS, detail
+ sum WristS, detail
+ 
+ by Gender, sort: sum KneeS, detail
+ sum KneeS, detail
+ 
+ by Gender, sort: sum AnkleS, detail
+ sum AnkleS, detail
+ 
+ by Gender, sort: sum ShoulderG, detail
+ sum ShoulderG, detail
+ 
+ by Gender, sort: sum ChestG, detail
+ sum ChestG, detail
+ 
+ by Gender, sort: sum WaistG, detail
+ sum WaistG, detail
+ 
+ by Gender, sort: sum NavelG, detail
+ sum NavelG, detail
+ 
+ by Gender, sort: sum HipG, detail
+ sum HipG, detail
+ 
+ by Gender, sort: sum ThighG, detail
+ sum ThighG, detail
+ 
+ by Gender, sort: sum BicepG, detail
+ sum BicepG, detail
+ 
+ by Gender, sort: sum ForearmG, detail
+ sum ForearmG, detail
+ 
+ by Gender, sort: sum KneeG, detail
+ sum KneeG, detail
+ 
+ by Gender, sort: sum CalfG, detail
+ sum CalfG, detail
+ 
+ by Gender, sort: sum AnkleG, detail
+ sum AnkleG, detail
+ 
+ by Gender, sort: sum WristG, detail
+ sum WristG, detail
+ 
+ by Gender, sort: sum Age, detail
+ sum Age, detail
+ 
+ by Gender, sort: sum Weight, detail
+ sum Weight, detail
+ 
+ by Gender, sort: sum Height, detail
+ sum Height, detail
+ 
+ by Gender, sort: sum BMI, detail
+ sum BMI, detail
+ 
+ by Gender, sort: tab bmi_cat
+ tab bmi_cat
+ 
+ 
+********************************************************************************
+* Damen's code
+********************************************************************************
+
+
+reg lWeight ChestDepthS KneeG ChestS Height BitrochantericS WristG BiiliacS Age ElbowS BiacromialS AnkleG Gender
+predict weight_bd2
+twoway (scatter BMI weight_bd2)
+
+reg lWeight ChestDepthS KneeG ChestS BitrochantericS BiiliacS WristG ElbowS Age Gender AnkleG
+predict lweight_bd
+
+reg lweight_bd BMI 
+reg lweight_bd BMI WaistG ForearmG Gender
+
+gen weight_bd=exp(lweight_bd)
+twoway (scatter weight_bd BMI )
+twoway (scatter weight_bd BMI if Gender==1,mcolor(blue)) (scatter weight_bd BMI if Gender==0,mcolor(red)), ///
+	legend(label(1 male) label(2 female)) 
+
+gen weight_dif = Weight - weight_bd
+twoway (scatter  weight_dif BMI if Gender==1,mcolor(blue)) (scatter weight_dif BMI if Gender==0,mcolor(red)), ///
+	legend(label(1 male) label(2 female)) 
+
+reg weight_bd BMI
+reg weight_dif BMI
+
+
+* Fat status: Predicted body build waist
+reg WaistG ChestS BiiliacS BitrochantericS ChestDepthS
+predict WaistG_bd
+predict Waist_dif,r
+// adjusted-R2 0.776
+twoway (scatter BMI Waist_dif if Gender==1,mcolor(blue) xline (-5 5)) (scatter BMI Waist_dif if Gender==0,mcolor(red)) , ///
+	legend(label(1 male) label(2 female)) 
+
+
+gen BMI4=.
+replace BMI4=1 if BMI<=20 & BMI>0
+replace BMI4=2 if BMI<=25 & BMI>20
+replace BMI4=3 if BMI<=30 & BMI>25
+replace BMI4=4 if BMI<=100 & BMI>30
+label define bmilabel 1 "BMI<=20" 2 "20<BMI<=25" 3 "25<BMI<=30" 4 "BMI>30"
+label value BMI4 bmilabel 
+
+
+tab BMI4 if Waist_dif>5 // 42.5% people with high fat mass are not classified as overweight
+tab BMI4 if Waist_dif>10 // 30% people with high fat mass are not classified as overweight
+
+tab BMI4 if Waist_dif<-5 // 16.5% people with low fat mass are classified as underweight
+tab BMI4 if Waist_dif<-10 // 27.3% people with low fat mass are classified as underweight
+
+
+*Muscle status
+reg ForearmG WristS ChestS ChestDepthS // adjusted-R2 0.787
+predict Forearm_dif, r
+label var Waist_dif "Forearm_ girth difference (muscle status)"
+
+twoway (scatter BMI Forearm_dif if Gender==1,mcolor(blue)) (scatter BMI Forearm_dif  if Gender==0,mcolor(red)), ///
+	legend(label(1 male) label(2 female)) 
+
+tab BMI4 if Forearm_dif>1 // 44.3% people with high muscle mass are classified as overweight
+tab BMI4 if Forearm_dif<-1 // 19.5% people with low muscle mass are classified as underweight
+
+
+
+
+
 
 
 
