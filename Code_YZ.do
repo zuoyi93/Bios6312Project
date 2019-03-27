@@ -301,54 +301,15 @@ gladder Weight
 
 gen lWeight = log(Weight)
 
-*********************************************
-* Model selection using best without height *
-*********************************************
-
-vselect lWeight BiacromialS-AnkleS Gender Age, best
-// ChestDepthS ChestS KneeS BitrochantericS Age BiiliacS WristS ElbowS
-
-vselect lWeight BiacromialS BiiliacS BitrochantericS ChestDepthS ChestS ElbowS   ///
-AnkleG KneeG WristG Gender Age, best
-
-// ChestDepthS KneeG ChestS BitrochantericS BiiliacS WristG ElbowS Age Gender AnkleG
-
-* Comparison of two models
-reg lWeight ChestDepthS ChestS KneeS BitrochantericS Age BiiliacS WristS ElbowS
-estat ic
-// AIC: -1320.389, BIC: -1282.332
-rvfplot
-
-reg lWeight ChestDepthS KneeG ChestS BitrochantericS BiiliacS WristG ElbowS Age Gender AnkleG
-estat ic
-// AIC: -1461.679, BIC: -1415.166
-rvfplot
-
-
-* Backward selection using AIC 
-
-vselect lWeight BiacromialS-AnkleS Gender Age, backward aic
-// -1302.705
-
-
-vselect lWeight BiacromialS BiiliacS BitrochantericS ChestDepthS ChestS ElbowS   ///
-AnkleG KneeG WristG Gender Age, backward aic
-// -1454.812
-
-// same model as `best`
-
-*********************************************
+******************************************
 * Model selection using best with height *
-*********************************************
+******************************************
 
 vselect lWeight BiacromialS-AnkleS Gender Age Height, best
-// ChestDepthS ChestS KneeS BitrochantericS Age BiiliacS WristS ElbowS
 // ChestDepthS ChestS KneeS BitrochantericS Height WristS Age BiiliacS BiacromialS
 
 vselect lWeight BiacromialS BiiliacS BitrochantericS ChestDepthS ChestS ElbowS   ///
 AnkleG KneeG WristG Gender Age Height, best
-
-// ChestDepthS KneeG ChestS BitrochantericS BiiliacS WristG ElbowS Age Gender AnkleG
 // ChestDepthS KneeG ChestS Height BitrochantericS WristG BiiliacS Age ElbowS BiacromialS AnkleG Gender
 
 * Comparison of two models
@@ -428,7 +389,7 @@ estat ic // AIC=-1041.318 greater than first method
 * Model 1a-1-2 *
 ****************
 
-reg lWeight ChestDepthS KneeG ChestS BitrochantericS BiiliacS WristG ElbowS Age Gender AnkleG
+reg lWeight ChestDepthS KneeG ChestS Height BitrochantericS WristG BiiliacS Age ElbowS BiacromialS AnkleG Gender
 rvfplot, caption(Model 1a-1-2) 
 
 		estat hettest, iid rhs		// Breush-Pagan / Cook-Weisberg, LM	
