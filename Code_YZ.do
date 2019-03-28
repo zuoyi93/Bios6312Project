@@ -456,6 +456,14 @@ crossfold regress lWeight ChestDepthS KneeG ChestS Height BitrochantericS ///
 * Model 1a-2-2 *
 ****************
 
+* likelihood test
+
+reg lWeight sq_sum_G_height Age Gender
+estimates store full
+
+reg lWeight sq_sum_G_height Age
+lrtest full .
+
 reg lWeight sq_sum_G_height Age
 rvfplot
 
