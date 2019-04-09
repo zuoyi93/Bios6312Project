@@ -1,0 +1,4 @@
+\beamer@sectionintoc {1}{Distance}{3}{0}{1}
+\beamer@subsectionintoc {1}{1}{Scalar Distance}{3}{0}{1}
+\beamer@subsectionintoc {1}{2}{Mahalnobis Distance}{4}{0}{1}
+\beamer@sectionintoc {2}{Matches}{12}{0}{2}
