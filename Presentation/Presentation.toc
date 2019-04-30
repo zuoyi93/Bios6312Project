@@ -5,4 +5,4 @@
 \beamer@subsectionintoc {2}{3}{Aim 2: Predicting gender from skeletal measures}{6}{0}{2}
 \beamer@sectionintoc {3}{Methods}{6}{0}{3}
 \beamer@sectionintoc {4}{Results}{11}{0}{4}
-\beamer@sectionintoc {5}{Discussion}{15}{0}{5}
+\beamer@sectionintoc {5}{Discussion}{16}{0}{5}
